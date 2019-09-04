@@ -1,15 +1,5 @@
-library(tidyverse)
-library(ggfortify)
-library(factoextra)
-library(FactoMineR)
-
 source("modules/UiUtils/dynamicDropdown.R")
-source("modules/UiUtils/tiledPlotServer.R")
-
 source("modules/Visualization/customPlot.R")
-
-source("modules/PCA/pcaPreprocess.R")
-
 
 
 server <- function(input, output, session) {
@@ -17,12 +7,14 @@ server <- function(input, output, session) {
 
   # a reactive event updates the app when it occurs
   d <- eventReactive(input$fileUpload, {
-
+      # read the csv upload
       df <- read.csv(input$fileUpload$datapath)
+      # create fake cohorts
       df$cohort <- paste("c", sample(1:250, nrow(df), replace = TRUE), sep = "")
       df
     }
   )
+
 
   ### manage clicks ------------------------------------------------------------
   # this saves clicks to avoids double refreshes
@@ -43,17 +35,17 @@ server <- function(input, output, session) {
   })
 
 
-
   ##### main plot --------------------------------------------------------------
-
+  # create the dropdowns
   output$yOptions <- dynamicDropdown(d(), inputId = "xAxisSelected",
                                      label = "x-Axis", selected = "texture_mean")
 
   output$xOptions <- dynamicDropdown(d(), inputId = "yAxisSelected",
                                      label = "Y-Axis", selected = "radius_mean")
-
+  # create the large, main plot
   scatterReactive <- reactive({
 
+    # wait for input
     req(input$xAxisSelected)
     req(input$yAxisSelected)
 
@@ -90,7 +82,7 @@ server <- function(input, output, session) {
     req(input$miniDropdown1XSelected)
     req(input$miniDropdown1YSelected)
 
-    # waits to hear what to label (by subject)
+    # waits to hear what to label (by cohort)
     toLabel <- sort(as.factor(savedClicks$click$cohort))
 
     # calls the custom plot from Visualization module
@@ -134,14 +126,13 @@ server <- function(input, output, session) {
                                     label = "Y-Axis", selected = "radius_mean")
 
   # create the plot
-  # create its dropdowns
   scatterPlot3 <- reactive({
 
     # wait for data - avoids flash of a red error message
     req(input$miniDropdown3XSelected)
     req(input$miniDropdown3YSelected)
 
-    # waits to hear what to label (by subject)
+    # waits to hear what to label (by cohort)
     toLabel <- sort(as.factor(savedClicks$click$cohort))
 
     # calls the custom plot from Visualization module
@@ -158,13 +149,15 @@ server <- function(input, output, session) {
                                    label = "X-Axis", selected = "smoothness_mean")
   output$plot4Y <- dynamicDropdown(d(), inputId = "miniDropdown4YSelected",
                                     label = "Y-Axis", selected = "radius_mean")
+
+  # create the plot
   scatterPlot4 <- reactive({
 
-    # create the plot
+    # wait for data - avoids flash of a red error message
     req(input$miniDropdown4XSelected)
     req(input$miniDropdown4YSelected)
 
-    # wait for data - avoids flash of a red error message
+    # waits to hear what to label (by cohort)
     toLabel <- sort(as.factor(savedClicks$click$cohort))
 
     # calls the custom plot from Visualization module
@@ -183,10 +176,11 @@ server <- function(input, output, session) {
                                    label = "Y-Axis", selected = "radius_mean")
   scatterPlot5 <- reactive({
 
+    # wait for data - avoids flash of a red error message
     req(input$miniDropdown5XSelected)
     req(input$miniDropdown5YSelected)
 
-    # wait for data - avoids flash of a red error message
+    # waits to hear what to label (by cohort)
     toLabel <- sort(as.factor(savedClicks$click$cohort))
 
     customPlot(df = d(),
@@ -204,10 +198,11 @@ server <- function(input, output, session) {
                                    label = "Y-Axis", selected = "radius_mean")
   scatterPlot6 <- reactive({
 
+    # wait for data - avoids flash of a red error message
     req(input$miniDropdown6XSelected)
     req(input$miniDropdown6YSelected)
 
-    # wait for data - avoids flash of a red error message
+    # waits to hear what to label (by cohort)
     toLabel <- sort(as.factor(savedClicks$click$cohort))
 
     customPlot(df = d(),
